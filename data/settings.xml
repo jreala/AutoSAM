@@ -1,0 +1,28 @@
+<?xml version="1.1" ?>
+<settings>
+    <global>
+        <debug>false</debug>
+        <enabled>true</enabled>
+        <hagakure>false</hagakure>
+        <hasso>true</hasso>
+        <konzen>false</konzen>
+        <meditate>
+            <auto>true</auto>
+            <useBelowTP>2000</useBelowTP>
+        </meditate>
+        <sekkanoki>true</sekkanoki>
+        <sengikori>true</sengikori>
+        <warrior>
+            <aggressor>false</aggressor>
+            <berserk>false</berserk>
+            <warcry>false</warcry>
+        </warrior>
+    </global>
+    <syzak>
+        <warrior>
+            <aggressor>true</aggressor>
+            <berserk>true</berserk>
+            <warcry>true</warcry>
+        </warrior>
+    </syzak>
+</settings>
