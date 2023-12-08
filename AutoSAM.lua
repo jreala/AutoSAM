@@ -257,7 +257,7 @@ local function onAddonCommand(...)
     log('Hasso: ' .. (settings.hasso and ON() or OFF()))
   end
 
-  if (formattedArgs:contains('meditate below')) then
+  if (formattedArgs:contains('meditate')) then
     local meditateIndex = formattedArgs:find('meditate')
     if (formattedArgs[meditateIndex + 1] and formattedArgs[meditateIndex + 1] == 'below' and formattedArgs[meditateIndex + 2]) then
       settings.meditate.useBelowTP = tonumber(formattedArgs[meditateIndex + 2])
