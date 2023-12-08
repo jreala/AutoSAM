@@ -1,7 +1,7 @@
 _addon.author = 'Syz'
 _addon.name = 'AutoSAM'
 _addon.commands = { 'sam', 'asam', 'autosam' }
-_addon.version = "1.0.0"
+_addon.version = "1.0.1"
 
 -------------
 -- Imports --
@@ -224,6 +224,7 @@ local function showCommands()
   log('//autosam | //sam | //asam')
   log('  debug                      Enable debug logs')
   log('  start | enable             Enable automatic usage of abilities')
+  log('  stop | disable | end       Enable automatic usage of abilities')
   log('  hasso                      Enable usage of Hasso')
   log('  meditate                   Enable usage of Meditate')
   log('  meditate below <number>    Uses meditate below TP')
@@ -238,6 +239,7 @@ local function showCommands()
   log('  save                       Save current settings for current character')
   log('  save all                   Save current settings for all characters')
   log('  reload                     Reload the addon')
+  log('  unload                     Reload the addon')
   log('Most commands can be stacked. Example:')
   log('//sam start hasso meditate')
 end
@@ -246,9 +248,19 @@ local function onAddonCommand(...)
   local args = T { ... }
   local formattedArgs = args:map(string.lower)
 
+  if (#formattedArgs == 0) then
+    settings.enabled = not settings.enabled
+    log('AutoSAM ' .. (settings.enabled and ON() or OFF()))
+    return
+  end
+
   if (formattedArgs:contains('help')) then
     showCommands()
     return
+  end
+
+  if (formattedArgs:contains('unload')) then
+    windower.send_command('lua unload AutoSAM')
   end
 
   if (formattedArgs:contains('reload')) then
@@ -269,8 +281,11 @@ local function onAddonCommand(...)
   end
 
   if (formattedArgs:contains('start') or formattedArgs:contains('enable')) then
-    settings.enabled = not settings.enabled
-    log('AutoSAM ' .. (settings.enabled and ON() or OFF()))
+    settings.enabled = true
+    log('AutoSAM ' .. ON())
+  elseif (formattedArgs:contains('stop') or formattedArgs:contains('end') or formattedArgs:contains('disable')) then
+    settings.enabled = false
+    log('AutoSAM ' .. OFF())
   end
 
   if (formattedArgs:contains('hasso')) then
