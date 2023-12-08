@@ -1,7 +1,7 @@
 _addon.author = 'Syz'
 _addon.name = 'AutoSAM'
 _addon.commands = { 'sam', 'asam', 'autosam' }
-_addon.version = "0.0.0-beta"
+_addon.version = "1.0.0"
 
 -------------
 -- Imports --
@@ -46,6 +46,10 @@ local Ability = {
   Sengikori = 141,
   Hagakure = 54,
   KonzenIttai = 132,
+
+  Berserk = 1,
+  Warcry = 2,
+  Aggressor = 4,
 }
 
 local Buff = {
@@ -195,6 +199,23 @@ local function prerender()
       debug('Using Konzen-Ittai')
       useJA('/ja "Konzen-Ittai" <t>')
       return
+    end
+
+    if (player.sub_job == 'WAR') then
+      if (settings.warrior.berserk and recasts[Ability.Berserk] <= 0 and player.status == 1) then
+        debug('Using Berserk')
+        useJA('/ja "Berserk" <me>')
+      end
+
+      if (settings.warrior.aggressor and recasts[Ability.Aggressor] <= 0 and player.status == 1) then
+        debug('Using Aggressor')
+        useJA('/ja "Aggressor" <me>')
+      end
+
+      if (settings.warrior.warcry and recasts[Ability.Warcry] <= 0 and player.status == 1) then
+        debug('Using Warcry')
+        useJA('/ja "Warcry" <me>')
+      end
     end
   end
 end
