@@ -1,7 +1,7 @@
 _addon.author = 'Syz'
 _addon.name = 'AutoSAM'
 _addon.commands = { 'sam', 'asam', 'autosam' }
-_addon.version = "1.0.1"
+_addon.version = "1.0.2"
 
 -------------
 -- Imports --
@@ -123,6 +123,10 @@ local function colorUserInput(str)
   return string.color(str, string.char(0x1F, 0x1E))
 end
 
+local function disable()
+  settings.enabled = false
+end
+
 ---------------
 -- Listeners --
 ---------------
@@ -141,6 +145,12 @@ local function prerender()
     actionDelay = 1.2
 
     local player = windower.ffxi.get_player()
+
+    -- stop on death
+    if (player.status == 2) then
+      disable()
+    end
+
     if (player.main_job ~= 'SAM' or player.status > 1) then
       return
     end
@@ -353,5 +363,6 @@ end
 
 windower.register_event('load', 'login', onLoad)
 windower.register_event('prerender', prerender)
+windower.register_event('zone change', 'job change', disable)
 
 windower.register_event('addon command', onAddonCommand)
