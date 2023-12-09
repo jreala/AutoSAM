@@ -1,7 +1,7 @@
 _addon.author = 'Syz'
 _addon.name = 'AutoSAM'
 _addon.commands = { 'sam', 'asam', 'autosam' }
-_addon.version = "1.0.2"
+_addon.version = "1.0.3"
 
 -------------
 -- Imports --
@@ -41,6 +41,7 @@ local settings = config.load(defaults)
 -------------
 local Ability = {
   Hasso = 138,
+  Seigan = 139,
   Meditate = 134,
   Sekkanoki = 140,
   Sengikori = 141,
@@ -54,6 +55,7 @@ local Ability = {
 
 local Buff = {
   Hasso = 353,
+  Seigan = 354,
   Sekkanoki = 408,
   Sengikori = 440,
   Hagakure = 483,
@@ -175,7 +177,8 @@ local function prerender()
       return
     end
 
-    if (settings.hasso and recasts[Ability.Hasso] <= 0 and not table.contains(buffs, Buff.Hasso)) then
+    -- Don't override Seigan if it's up
+    if (settings.hasso and recasts[Ability.Hasso] <= 0 and not table.contains(buffs, Buff.Hasso) and not table.contains(buffs, Buff.Seigan)) then
       debug('Using Hasso')
       useJA('/ja "Hasso" <me>')
       return
