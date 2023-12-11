@@ -16,6 +16,11 @@
         <warrior>
             <aggressor>true</aggressor>
             <berserk>true</berserk>
+            <provoke>
+                <auto>false</auto>
+                <max>17.8</max>
+                <min>3.5</min>
+            </provoke>
             <warcry>true</warcry>
         </warrior>
     </global>

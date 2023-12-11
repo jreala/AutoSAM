@@ -1,7 +1,7 @@
 _addon.author = 'Syz'
 _addon.name = 'AutoSAM'
 _addon.commands = { 'sam', 'asam', 'autosam' }
-_addon.version = "1.0.4"
+_addon.version = "1.1.0"
 
 -------------
 -- Imports --
@@ -24,6 +24,11 @@ local defaults = {
     berserk = false,
     warcry = false,
     aggressor = false,
+    provoke = {
+      auto = false,
+      min = 3.5,
+      max = 17.8,
+    },
   },
   sekkanoki = false,
   sengikori = false,
@@ -51,6 +56,7 @@ local Ability = {
   Berserk = 1,
   Warcry = 2,
   Aggressor = 4,
+  Provoke = 5,
 }
 
 local Buff = {
@@ -129,6 +135,15 @@ local function disable()
   settings.enabled = false
 end
 
+local function isInProvokeRange(target)
+  local distance = math.sqrt(target.distance)
+  debug('Distance to target : ' .. math.sqrt(target.distance))
+  if (distance >= settings.warrior.provoke.min and distance <= settings.warrior.provoke.max) then
+    return true
+  end
+  return false
+end
+
 ---------------
 -- Listeners --
 ---------------
@@ -170,16 +185,13 @@ local function prerender()
     local isAbilityImpaired = #table.filter(buffs, function(buff)
       return AbilityImpaired:contains(buff)
     end)
-    debug('Ability Impaired: ' .. isAbilityImpaired)
-
 
     local isSubJobImpaired = #table.filter(buffs, function(buff)
       return SubJobImpaired:contains(buff)
     end)
-    debug('Is Subjob Impaired: ' .. isSubJobImpaired)
 
-    if (isAbilityImpaired > 0 or isSubJobImpaired > 0 or buffs[Buff.Invisible]) then
-      debug('Impaired, waiting...')
+    if (isAbilityImpaired > 0 or buffs[Buff.Invisible]) then
+      debug('Ability Impaired: ' .. isAbilityImpaired)
       return
     end
 
@@ -221,6 +233,10 @@ local function prerender()
     end
 
     if (player.sub_job == 'WAR') then
+      if (isSubJobImpaired > 0) then
+        debug('SJ Impaired: ' .. isAbilityImpaired)
+        return
+      end
       if (settings.warrior.berserk and recasts[Ability.Berserk] <= 0 and player.status == 1) then
         debug('Using Berserk')
         useJA('/ja "Berserk" <me>')
@@ -231,9 +247,15 @@ local function prerender()
         useJA('/ja "Aggressor" <me>')
       end
 
-      if (settings.warrior.warcry and recasts[Ability.Warcry] <= 0 and player.status == 1) then
+      if (settings.warrior.warcry and recasts[Ability.Warcry] <= 0 and player.status == 1 and not buffs[Buff.Warcry]) then
         debug('Using Warcry')
         useJA('/ja "Warcry" <me>')
+      end
+
+      local target = windower.ffxi.get_mob_by_target('t')
+      if (settings.warrior.provoke.auto and recasts[Ability.Provoke] <= 0 and player.status == 1 and target and isInProvokeRange(target)) then
+        debug('Using Provoke')
+        useJA('/ja "Provoke" <t>')
       end
     end
   end
@@ -255,6 +277,8 @@ local function showCommands()
   log('  berserk                    Enable usage of Berserk')
   log('  warcry                     Enable usage of Warcry')
   log('  aggressor                  Enable usage of Aggressor')
+  log('  provoke                    Enable usage of Provoke')
+  log('  provoke range <m> [to <M>] Set min and max distance to target for using Provoke')
   log('  save                       Save current settings for current character')
   log('  save all                   Save current settings for all characters')
   log('  reload                     Reload the addon')
@@ -356,6 +380,22 @@ local function onAddonCommand(...)
   if (formattedArgs:contains('aggressor')) then
     settings.warrior.aggressor = not settings.warrior.aggressor
     log('Aggressor: ' .. (settings.warrior.aggressor and ON() or OFF()))
+  end
+
+  if (formattedArgs:contains('provoke')) then
+    local provokeIndex = formattedArgs:find('provoke')
+    if (formattedArgs[provokeIndex + 1] and formattedArgs[provokeIndex + 1] == 'range' and formattedArgs[provokeIndex + 2]) then
+      settings.warrior.provoke.min = tonumber(formattedArgs[provokeIndex + 2])
+      log('Provoke min range set to ' .. colorUserInput(formattedArgs[provokeIndex + 2]))
+      if (formattedArgs[provokeIndex + 3] and formattedArgs[provokeIndex + 3] == "to" and formattedArgs[provokeIndex + 4]) then
+        local userMax = tonumber(formattedArgs[provokeIndex + 4])
+        settings.warrior.provoke.max = userMax <= 17.8 and userMax or 17.8
+        log('Provoke max range set to ' .. colorUserInput(formattedArgs[provokeIndex + 4]))
+      end
+    else
+      settings.warrior.provoke.auto = not settings.warrior.provoke.auto
+      log('Provoke: ' .. (settings.warrior.provoke.auto and ON() or OFF()))
+    end
   end
 
   if (formattedArgs:contains('save')) then
