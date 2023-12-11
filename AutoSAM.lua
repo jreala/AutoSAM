@@ -1,7 +1,7 @@
 _addon.author = 'Syz'
 _addon.name = 'AutoSAM'
 _addon.commands = { 'sam', 'asam', 'autosam' }
-_addon.version = "1.0.3"
+_addon.version = "1.0.4"
 
 -------------
 -- Imports --
@@ -148,6 +148,12 @@ local function prerender()
 
     local player = windower.ffxi.get_player()
 
+    if (not player) then
+      warn('Unable to find player, turning off')
+      disable()
+      return
+    end
+
     -- stop on death
     if (player.status == 2) then
       disable()
@@ -263,7 +269,7 @@ local function onAddonCommand(...)
 
   if (#formattedArgs == 0) then
     settings.enabled = not settings.enabled
-    log('AutoSAM ' .. (settings.enabled and ON() or OFF()))
+    log('Turning ' .. (settings.enabled and ON() or OFF()))
     return
   end
 
@@ -366,6 +372,6 @@ end
 
 windower.register_event('load', 'login', onLoad)
 windower.register_event('prerender', prerender)
-windower.register_event('zone change', 'job change', disable)
+windower.register_event('zone change', 'job change', 'logout', disable)
 
 windower.register_event('addon command', onAddonCommand)
